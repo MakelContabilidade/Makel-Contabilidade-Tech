@@ -45,7 +45,7 @@ export default function Login() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#31323E1A_1px,transparent_1px),linear-gradient(to_bottom,#31323E1A_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <div className="relative z-10 max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1.5">
+            <div className="w-12 h-12 rounded-xl bg-[#252538] border border-[#252538] flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1.5">
               <img src="/logo.png" alt="Makel" className="w-full h-full object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
@@ -70,7 +70,7 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-6 md:p-12">
         <div className="w-full max-w-md space-y-8">
           <div className="md:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1">
+            <div className="w-10 h-10 rounded-xl bg-[#252538] border border-[#252538] flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1">
               <img src="/logo.png" alt="Makel" className="w-full h-full object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {

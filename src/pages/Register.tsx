@@ -129,7 +129,7 @@ export default function Register() {
         
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1">
+            <div className="w-10 h-10 rounded-xl bg-[#252538] border border-[#252538] flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1">
               <img src="/logo.png" alt="Makel" className="w-full h-full object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
