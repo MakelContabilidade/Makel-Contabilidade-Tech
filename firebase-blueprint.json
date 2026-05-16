@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User and company profile",
+      "type": "object",
+      "required": ["email", "companyName", "cnpj"],
+      "properties": {
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "cpf": { "type": "string" },
+        "companyName": { "type": "string" },
+        "tradeName": { "type": "string" },
+        "cnpj": { "type": "string" },
+        "stateRegistration": { "type": "string" },
+        "taxRegime": { "type": "string" },
+        "segment": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "role": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      }
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial records (income and expense)",
+      "type": "object",
+      "required": ["title", "amount", "type", "date", "category"],
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["in", "out"] },
+        "date": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string", "enum": ["paid", "pending"] },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      }
+    },
+    "Billing": {
+      "title": "Billing",
+      "description": "Billing records",
+      "type": "object",
+      "required": ["client", "amount", "dueDate", "status", "method"],
+      "properties": {
+        "client": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "dueDate": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pendente", "Vencido", "Pago"] },
+        "method": { "type": "string", "enum": ["PIX", "Boleto", "Cartão"] },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles and company data"
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "Transactions belonging to a user"
+    },
+    "/users/{userId}/billings/{billingId}": {
+      "schema": { "$ref": "#/entities/Billing" },
+      "description": "Billings belonging to a user"
+    }
+  }
+}

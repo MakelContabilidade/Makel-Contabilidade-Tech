@@ -1,0 +1,95 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ==== 0. Global Safety Net ====
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ==== Primitive Definitions ====
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // ==== Validations ====
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'companyName', 'cnpj']) &&
+             data.email is string && data.email.size() <= 128 &&
+             data.companyName is string && data.companyName.size() <= 200 &&
+             data.cnpj is string && data.cnpj.size() <= 20 &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['title', 'amount', 'type', 'date', 'category']) &&
+             data.title is string && data.title.size() <= 128 &&
+             data.amount is number &&
+             data.type is string && data.type in ['in', 'out'] &&
+             data.date is string && data.date.size() <= 32 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
+    function isValidBilling(data) {
+      return data.keys().hasAll(['client', 'amount', 'dueDate', 'status', 'method']) &&
+             data.client is string && data.client.size() <= 128 &&
+             data.amount is number &&
+             data.dueDate is string && data.dueDate.size() <= 32 &&
+             data.status is string && data.status in ['Pendente', 'Vencido', 'Pago'] &&
+             data.method is string && data.method in ['PIX', 'Boleto', 'Cartão'] &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
+    // ==== Paths ====
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidUser(incoming()) &&
+                       incoming().createdAt == request.time.toMillis() &&
+                       incoming().updatedAt == request.time.toMillis();
+      allow update: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidUser(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt == request.time.toMillis();
+      // No delete or list for Users
+      
+      match /transactions/{transactionId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(transactionId) &&
+                         isValidTransaction(incoming()) &&
+                         incoming().createdAt == request.time.toMillis() &&
+                         incoming().updatedAt == request.time.toMillis();
+        allow update: if isOwner(userId) &&
+                         isValidId(transactionId) &&
+                         isValidTransaction(incoming()) &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().updatedAt == request.time.toMillis();
+        allow delete: if isOwner(userId) && isValidId(transactionId);
+      }
+
+      match /billings/{billingId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(billingId) &&
+                         isValidBilling(incoming()) &&
+                         incoming().createdAt == request.time.toMillis() &&
+                         incoming().updatedAt == request.time.toMillis();
+        allow update: if isOwner(userId) &&
+                         isValidId(billingId) &&
+                         isValidBilling(incoming()) &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().updatedAt == request.time.toMillis();
+        allow delete: if isOwner(userId) && isValidId(billingId);
+      }
+    }
+  }
+}
