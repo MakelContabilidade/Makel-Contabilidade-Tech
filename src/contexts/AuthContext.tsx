@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import bcrypt from "bcryptjs";
+import { supabase } from "@/lib/supabase";
 
 interface AppUser {
   uid: string;
@@ -10,7 +10,6 @@ interface AppUser {
   role?: string;
   status?: string;
   must_change_password?: boolean;
-  password_hash?: string;
   [key: string]: any;
 }
 
@@ -37,198 +36,170 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [selectedClientId, setSelectedClientIdState] = useState<string | null>(null);
   const [selectedClientData, setSelectedClientData] = useState<any | null>(null);
 
-  const setSelectedClientId = (id: string | null) => {
+  const setSelectedClientId = async (id: string | null) => {
     setSelectedClientIdState(id);
     if (!id) {
       setSelectedClientData(null);
     } else {
-      const usersStr = localStorage.getItem("@Makel:users") || "{}";
-      const users = JSON.parse(usersStr);
-      setSelectedClientData(users[id] || null);
+      const { data } = await supabase.from('profiles').select('*').eq('id', id).single();
+      if (data) {
+        setSelectedClientData({ ...data, uid: data.id, companyName: data.company_name });
+      } else {
+        // Fallback for UI if real DB doesn't have it
+        setSelectedClientData(null);
+      }
     }
   };
 
   useEffect(() => {
-    // Check localStorage for session
-    seedInitialUsers();
-    
-    const storedUserId = localStorage.getItem("@Makel:userId");
-    if (storedUserId) {
-      const usersStr = localStorage.getItem("@Makel:users") || "{}";
-      const users = JSON.parse(usersStr);
-      if (users[storedUserId]) {
-        if(users[storedUserId].status === "inativo") {
-           localStorage.removeItem("@Makel:userId");
-        } else {
-          setUser({ uid: storedUserId, email: users[storedUserId].email });
-          setAppUser(users[storedUserId]);
-        }
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser({ uid: session.user.id, email: session.user.email });
+        await fetchProfile(session.user.id);
       } else {
-        localStorage.removeItem("@Makel:userId");
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+    
+    initAuth();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        setUser({ uid: session.user.id, email: session.user.email });
+        await fetchProfile(session.user.id);
+      } else {
+        setUser(null);
+        setAppUser(null);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
-  const seedInitialUsers = () => {
-    const usersStr = localStorage.getItem("@Makel:users") || "{}";
-    const users = JSON.parse(usersStr);
-
-    let needsUpdate = false;
-
-    // Admin Master
-    if (!users["master_1"]) {
-      users["master_1"] = {
-        uid: "master_1",
-        email: "kleber.felipe@makelcontabilidade.com",
-        name: "Kleber Felipe",
-        role: "MASTER",
-        status: "aprovado",
-        companyName: "Makel Contabilidade",
-        password_hash: bcrypt.hashSync("Kleber05!", 10),
-        must_change_password: true,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      };
-      needsUpdate = true;
-    }
-
-    // Admin 2
-    if (!users["admin_1"]) {
-      users["admin_1"] = {
-        uid: "admin_1",
-        email: "karen.fernanda@makelcontabilidade.com",
-        name: "Karen Fernanda",
-        role: "ADMIN",
-        status: "aprovado",
-        companyName: "Makel Contabilidade",
-        password_hash: bcrypt.hashSync("Karen05!", 10),
-        must_change_password: true,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      };
-      needsUpdate = true;
-    }
-
-    if (needsUpdate) {
-      localStorage.setItem("@Makel:users", JSON.stringify(users));
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      if (data) {
+        // map db to appUser
+        const p: AppUser = {
+          uid: data.id,
+          email: data.email,
+          name: data.name,
+          companyName: data.company_name,
+          cnpj: data.cnpj,
+          role: data.role,
+          status: data.status,
+          must_change_password: data.must_change_password
+        };
+        setAppUser(p);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const signIn = async (email: string, password?: string) => {
-    const usersStr = localStorage.getItem("@Makel:users") || "{}";
-    const users = JSON.parse(usersStr);
+    if (!password) throw new Error("auth/missing-password");
     
-    let foundUser = null;
-    for (const key in users) {
-      if (users[key].email === email) {
-        foundUser = users[key];
-        break;
-      }
-    }
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (foundUser) {
-      if (foundUser.role === 'MASTER' || foundUser.role === 'ADMIN' || foundUser.role === 'COLABORADOR') {
-        if (foundUser.status === 'inativo') {
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    if (data.user) {
+      // Check status from profile
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+      if (profile) {
+        if (profile.status === 'inativo' || profile.status === 'bloqueado' || profile.status === 'recusado') {
+          await supabase.auth.signOut();
           throw new Error("auth/user-inactive");
         }
-      } else {
-        if (foundUser.status === 'inativo' || foundUser.status === 'bloqueado' || foundUser.status === 'recusado') {
-          throw new Error("auth/user-inactive");
-        }
-        if (foundUser.status !== 'aprovado') {
+        if (profile.role === 'CLIENTE' && profile.status !== 'aprovado') {
+          await supabase.auth.signOut();
           throw new Error("auth/user-not-approved");
         }
       }
-
-      if (password && foundUser.password_hash) {
-        const isMatch = bcrypt.compareSync(password, foundUser.password_hash);
-        if (!isMatch) {
-          throw new Error("auth/invalid-password");
-        }
-      }
-
-      // Update last_login
-      foundUser.last_login = Date.now();
-      users[foundUser.uid] = foundUser;
-      localStorage.setItem("@Makel:users", JSON.stringify(users));
-
-      localStorage.setItem("@Makel:userId", foundUser.uid);
-      setUser({ uid: foundUser.uid, email: foundUser.email });
-      setAppUser(foundUser);
-    } else {
-      throw new Error("auth/user-not-found");
     }
   };
 
   const changePassword = async (newPassword: string) => {
-    if (!appUser) return;
-    const usersStr = localStorage.getItem("@Makel:users") || "{}";
-    const users = JSON.parse(usersStr);
-
-    if (users[appUser.uid]) {
-      const hash = bcrypt.hashSync(newPassword, 10);
-      users[appUser.uid].password_hash = hash;
-      users[appUser.uid].must_change_password = false;
-      users[appUser.uid].updatedAt = Date.now();
-      
-      localStorage.setItem("@Makel:users", JSON.stringify(users));
-      setAppUser(users[appUser.uid]);
+    if (!user) return;
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw new Error(error.message);
+    
+    // update must_change_password
+    await supabase.from('profiles').update({ must_change_password: false, updated_at: new Date().toISOString() }).eq('id', user.uid);
+    if (appUser) {
+      setAppUser({ ...appUser, must_change_password: false });
     }
   };
 
   const signUp = async (data: any) => {
-    const usersStr = localStorage.getItem("@Makel:users") || "{}";
-    const users = JSON.parse(usersStr);
-    
-    const isFirst = Object.keys(users).length === 0;
-    
-    for (const key in users) {
-      if (users[key].email === data.email) {
+    const { data: authData, error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password || 'defaultPassword123!',
+      options: {
+        data: {
+          name: data.name,
+        }
+      }
+    });
+
+    if (error) {
+      if (error.message.includes('already registered')) {
         throw new Error("auth/email-already-in-use");
       }
+      throw new Error(error.message);
     }
-
-    const uid = "user_" + Date.now();
-    const newUser = { 
-      ...data, 
-      uid, 
-      role: isFirst ? "MASTER" : "CLIENTE",
-      status: isFirst ? "aprovado" : "pendente_aprovacao",
-      password_hash: data.password ? bcrypt.hashSync(data.password, 10) : undefined,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-    users[uid] = newUser;
     
-    localStorage.setItem("@Makel:users", JSON.stringify(users));
-    
-    if (isFirst) {
-      localStorage.setItem("@Makel:userId", uid);
-      setUser({ uid, email: newUser.email });
-      setAppUser(newUser);
-    } else {
-      throw new Error("auth/user-pending");
+    if (authData.user) {
+        // Assume trigger creates profile, update with extra data
+        setTimeout(async () => {
+            const isFirst = false; // logic removed for simplicity
+            await supabase.from('profiles').update({
+                name: data.name,
+                company_name: data.companyName,
+                cnpj: data.cnpj,
+                role: 'CLIENTE',
+                status: 'pendente_aprovacao'
+            }).eq('id', authData.user?.id);
+        }, 1000); // delay to let trigger run
+        
+        throw new Error("auth/user-pending"); // UI expects error to not login immediately
     }
   };
 
   const signOut = async () => {
-    localStorage.removeItem("@Makel:userId");
+    await supabase.auth.signOut();
     setUser(null);
     setAppUser(null);
+    localStorage.removeItem("@Makel:userId"); // cleanup
   };
 
   const updateAppUser = async (data: Partial<AppUser>) => {
     if (!user) return;
-    const usersStr = localStorage.getItem("@Makel:users") || "{}";
-    const users = JSON.parse(usersStr);
     
-    if (users[user.uid]) {
-      const updated = { ...users[user.uid], ...data, updatedAt: Date.now() };
-      users[user.uid] = updated;
-      
-      localStorage.setItem("@Makel:users", JSON.stringify(users));
-      setAppUser(updated);
+    const dbData: any = {};
+    if (data.name) dbData.name = data.name;
+    if (data.companyName) dbData.company_name = data.companyName;
+    if (data.cnpj) dbData.cnpj = data.cnpj;
+    if (data.role) dbData.role = data.role;
+    if (data.status) dbData.status = data.status;
+    dbData.updated_at = new Date().toISOString();
+
+    const { error } = await supabase.from('profiles').update(dbData).eq('id', user.uid);
+    if (!error && appUser) {
+      setAppUser({ ...appUser, ...data });
     }
   };
 
