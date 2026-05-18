@@ -163,8 +163,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex flex-col w-64 border-r border-border bg-background z-20">
         <div className="p-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1e202c] border border-[#1e202c] flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1">
-              <img src="/logo.png" alt="Makel" className="w-full h-full object-contain drop-shadow-md" onError={(e) => {
+            <div className="h-10 flex items-center shrink-0">
+              <img src="/logo-v3.png" alt="Makel" className="h-full w-auto object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
                   (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
@@ -173,7 +173,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <span className="hidden font-bold text-white text-xl">M</span>
             </div>
             <div className="overflow-hidden">
-              <h1 className="font-bold leading-tight truncate text-[15px]">{appUser?.companyName || 'Makel Contabilidade'}</h1>
               <p className="text-[11px] font-bold text-muted-foreground truncate">{appUser?.role || 'Administrador'}</p>
             </div>
           </div>

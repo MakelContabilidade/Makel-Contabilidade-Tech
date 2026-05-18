@@ -45,18 +45,14 @@ export default function Login() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#31323E1A_1px,transparent_1px),linear-gradient(to_bottom,#31323E1A_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <div className="relative z-10 max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-[#252538] border border-[#252538] flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1.5">
-              <img src="/logo.png" alt="Makel" className="w-full h-full object-contain drop-shadow-md" onError={(e) => {
+            <div className="h-[60px] flex items-center shrink-0">
+              <img src="/logo-v3.png" alt="Makel" className="h-full w-auto object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
                   (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
                 }
               }} />
               <span className="hidden font-bold text-white text-2xl">M</span>
-            </div>
-            <div>
-              <h1 className="font-bold text-3xl text-white leading-tight">Makel</h1>
-              <p className="text-muted-foreground font-medium">Contabilidade</p>
             </div>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">A contabilidade do futuro, hoje.</h2>
@@ -70,18 +66,14 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-6 md:p-12">
         <div className="w-full max-w-md space-y-8">
           <div className="md:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-10 h-10 rounded-xl bg-[#252538] border border-[#252538] flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1">
-              <img src="/logo.png" alt="Makel" className="w-full h-full object-contain drop-shadow-md" onError={(e) => {
+            <div className="h-[60px] flex items-center shrink-0">
+              <img src="/logo-v3.png" alt="Makel" className="h-full w-auto object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
                   (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
                 }
               }} />
               <span className="hidden font-bold text-white text-xl">M</span>
-            </div>
-            <div>
-              <h1 className="font-bold text-2xl text-white leading-tight">Makel</h1>
-              <p className="text-xs text-muted-foreground font-medium">Contabilidade</p>
             </div>
           </div>
           

@@ -106,9 +106,9 @@ export default function Dashboard() {
           <Button variant="secondary" size="icon" className="rounded-full">
             <AlertCircle className="w-5 h-5 text-muted-foreground" />
           </Button>
-          <div className="md:hidden flex items-center bg-card rounded-full pl-1 pr-3 py-1 gap-2 border border-border">
-            <div className="w-8 h-8 rounded-full bg-[#1e202c] border border-[#1e202c] flex items-center justify-center overflow-hidden shrink-0 p-1">
-              <img src="/logo.png" alt="Makel" className="w-full h-full object-contain" onError={(e) => {
+          <div className="md:hidden flex items-center bg-card rounded-full pl-3 pr-3 py-1 gap-2 border border-border">
+            <div className="h-8 flex items-center shrink-0">
+              <img src="/logo-v3.png" alt="Makel" className="h-full w-auto object-contain" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
                   (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
@@ -116,7 +116,6 @@ export default function Dashboard() {
               }} />
               <span className="hidden font-bold text-white text-xs">{appUser?.companyName?.charAt(0)?.toUpperCase() || 'M'}</span>
             </div>
-            <span className="text-xs font-medium truncate max-w-[120px]">{appUser?.companyName || 'Makel Contabilidade'}</span>
           </div>
         </div>
       </header>

@@ -129,8 +129,8 @@ export default function Register() {
         
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 rounded-xl bg-[#252538] border border-[#252538] flex items-center justify-center shadow-lg overflow-hidden shrink-0 p-1">
-              <img src="/logo.png" alt="Makel" className="w-full h-full object-contain drop-shadow-md" onError={(e) => {
+            <div className="h-[60px] flex items-center shrink-0">
+              <img src="/logo-v3.png" alt="Makel" className="h-full w-auto object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
                   (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
@@ -138,7 +138,6 @@ export default function Register() {
               }} />
               <span className="hidden font-bold text-white text-xl">M</span>
             </div>
-            <h1 className="font-bold text-xl text-white">Makel Contabilidade</h1>
           </div>
           
           <div className="space-y-8">
