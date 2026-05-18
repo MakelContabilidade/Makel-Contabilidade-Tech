@@ -23,7 +23,7 @@ export default defineConfig(({mode}) => {
         output: {
           manualChunks: {
             'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-            'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
+            'vendor-supabase': ['@supabase/supabase-js'],
             'vendor-recharts': ['recharts'],
             'vendor-pdf': ['jspdf', 'jspdf-autotable'],
             'vendor-excel': ['xlsx'],

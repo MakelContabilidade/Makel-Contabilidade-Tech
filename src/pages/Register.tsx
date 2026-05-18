@@ -106,13 +106,13 @@ export default function Register() {
       navigate("/");
     } catch (err: any) {
       console.error(err);
-      if (err.message === "auth/email-already-in-use") {
+      if (err.message === "auth/email-already-in-use" || String(err.message).includes("already registered")) {
         setError("Este e-mail já está em uso.");
       } else if (err.message === "auth/user-pending") {
         alert("Cadastro realizado com sucesso! Seu acesso está pendente de aprovação pela contabilidade.");
         navigate("/login");
       } else {
-        setError("Erro ao criar conta. Verifique os dados e tente novamente.");
+        setError("Não foi possível cadastrar o cliente. Verifique sua conexão ou tente novamente.");
       }
     } finally {
       setLoading(false);
