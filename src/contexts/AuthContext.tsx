@@ -155,11 +155,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    if (error) {
+      if (error) {
       if (error.message.includes('already registered')) {
         throw new Error("auth/email-already-in-use");
       }
-      throw new Error(error.message);
+      if (error.message.includes('fetch failed')) {
+        throw new Error("O banco de dados não está configurado. Configure as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env");
+      }
+      if (error.status === 404) {
+         throw new Error("A API (Supabase) não foi encontrada (Erro 404). Verifique se a variável VITE_SUPABASE_URL no ambiente está apontando para a URL correta do seu projeto no Supabase.");
+      }
+      throw new Error(`Erro na API: ${error.message}`);
     }
     
     if (authData.user) {

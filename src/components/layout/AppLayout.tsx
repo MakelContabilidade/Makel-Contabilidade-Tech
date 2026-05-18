@@ -164,7 +164,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="p-6">
           <div className="flex items-center gap-3">
             <div className="h-10 flex items-center shrink-0">
-              <img src="/logo-v3.png" alt="Makel" className="h-full w-auto object-contain drop-shadow-md" onError={(e) => {
+              <img src="/logo-novo.png" alt="Makel" className="h-full w-auto object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
                   (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';

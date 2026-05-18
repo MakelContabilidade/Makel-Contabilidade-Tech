@@ -108,7 +108,7 @@ export default function Dashboard() {
           </Button>
           <div className="md:hidden flex items-center bg-card rounded-full pl-3 pr-3 py-1 gap-2 border border-border">
             <div className="h-8 flex items-center shrink-0">
-              <img src="/logo-v3.png" alt="Makel" className="h-full w-auto object-contain" onError={(e) => {
+              <img src="/logo-novo.png" alt="Makel" className="h-full w-auto object-contain" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
                   (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';

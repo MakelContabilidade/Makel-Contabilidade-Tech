@@ -84,6 +84,7 @@ export default function Register() {
     try {
       const userData = {
         email: email,
+        password: password,
         name: name,
         cpf: cpf,
         role: role,
@@ -105,14 +106,14 @@ export default function Register() {
 
       navigate("/");
     } catch (err: any) {
-      console.error(err);
+      console.error("REGISTER ERROR:", err);
       if (err.message === "auth/email-already-in-use" || String(err.message).includes("already registered")) {
         setError("Este e-mail já está em uso.");
       } else if (err.message === "auth/user-pending") {
         alert("Cadastro realizado com sucesso! Seu acesso está pendente de aprovação pela contabilidade.");
         navigate("/login");
       } else {
-        setError("Não foi possível cadastrar o cliente. Verifique sua conexão ou tente novamente.");
+        setError(`Erro: ${err?.message || 'Falha desconhecida ao cadastrar. Verifique o console.'}`);
       }
     } finally {
       setLoading(false);
@@ -130,7 +131,7 @@ export default function Register() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
             <div className="h-[60px] flex items-center shrink-0">
-              <img src="/logo-v3.png" alt="Makel" className="h-full w-auto object-contain drop-shadow-md" onError={(e) => {
+              <img src="/logo-novo.png" alt="Makel" className="h-full w-auto object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
                   (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
