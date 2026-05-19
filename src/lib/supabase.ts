@@ -12,7 +12,7 @@ const isValidUrl = (url: string) => {
   }
 };
 
-const supabaseUrl = isValidUrl(envUrl) ? envUrl : 'https://nkvwyumzxobvxashtooo.supabase.com';
+const supabaseUrl = isValidUrl(envUrl) ? envUrl : 'https://nkvwyumzxobvxashtooo.supabase.co';
 const supabaseAnonKey = envKey && envKey.trim().length > 0 ? envKey : 'sb_publishable_1B_0eojVv-yIUFTqMoPswg_2z0dglXi';
 
 if (!supabaseUrl || !supabaseAnonKey) {

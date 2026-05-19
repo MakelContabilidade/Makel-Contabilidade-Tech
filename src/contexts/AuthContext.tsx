@@ -113,6 +113,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (error) {
+      const errMsg = error.message ? error.message.toLowerCase() : "";
+      if (errMsg.includes('fetch failed') || errMsg.includes('failed to fetch')) {
+        throw new Error("Não foi possível conectar ao banco de dados (Failed to fetch). Verifique se a variável VITE_SUPABASE_URL está correta.");
+      }
       throw new Error(error.message);
     }
     
@@ -145,6 +149,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (data: any) => {
+    console.log("[AuthContext signUp] Iniciando cadastro de:", data.email);
+    console.log("[AuthContext signUp] VITE_SUPABASE_URL está configurado como:", (import.meta.env.VITE_SUPABASE_URL || 'fallbacks para código fixo'));
+    
+    // Tratamento para payload
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password || 'defaultPassword123!',
@@ -155,20 +163,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-      if (error) {
-      if (error.message.includes('already registered')) {
+    if (error) {
+      console.error("[AuthContext signUp] Erro na requisição (Supabase):", error);
+      const errMsg = error.message ? error.message.toLowerCase() : "";
+      
+      if (errMsg.includes('already registered')) {
         throw new Error("auth/email-already-in-use");
       }
-      if (error.message.includes('fetch failed')) {
-        throw new Error("O banco de dados não está configurado. Configure as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env");
+      
+      if (errMsg.includes('fetch failed') || errMsg.includes('failed to fetch') || errMsg.includes('getaddrinfo') || errMsg.includes('network request failed')) {
+        throw new Error("Falha de conexão com a API do Supabase. Verifique se a URL (.supabase.co) em VITE_SUPABASE_URL está correta.");
       }
+      
       if (error.status === 404) {
-         throw new Error("A API (Supabase) não foi encontrada (Erro 404). Verifique se a variável VITE_SUPABASE_URL no ambiente está apontando para a URL correta do seu projeto no Supabase.");
+         throw new Error("A API (Supabase) não foi encontrada (Erro 404). A URL configurada pode estar incorreta ou projeto pausado.");
       }
-      throw new Error(`Erro na API: ${error.message}`);
+      
+      throw new Error(`Erro retornado pela API: ${error.message}`);
     }
     
-    if (authData.user) {
+    console.log("[AuthContext signUp] Sucesso no Auth, user:", authData?.user?.id);
         // Assume trigger creates profile, update with extra data
         setTimeout(async () => {
             const isFirst = false; // logic removed for simplicity
@@ -182,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, 1000); // delay to let trigger run
         
         throw new Error("auth/user-pending"); // UI expects error to not login immediately
-    }
+    
   };
 
   const signOut = async () => {
