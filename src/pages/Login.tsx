@@ -22,16 +22,17 @@ export default function Login() {
       await signIn(email, password);
       navigate("/");
     } catch (err: any) {
-      if (err.message === "auth/user-not-found") {
-        setError("Usuário não encontrado. Verifique seu e-mail.");
-      } else if (err.message === "auth/invalid-password") {
-        setError("Credenciais inválidas. Verifique seu e-mail e senha.");
-      } else if (err.message === "auth/user-inactive") {
+      console.error(err);
+      if (err.message === "auth/user-inactive") {
         setError("Seu acesso está inativo. Procure o administrador.");
       } else if (err.message === "auth/user-not-approved") {
         setError("Seu cadastro ainda não foi aprovado pela contabilidade.");
+      } else if (err.message?.includes("Invalid login credentials")) {
+        setError("Credenciais inválidas. Verifique seu e-mail e senha.");
+      } else if (err.message?.includes("Email not confirmed")) {
+        setError("E-mail não confirmado. Verifique sua caixa de entrada.");
       } else {
-        setError("Ocorreu um erro ao tentar fazer login. Tente novamente.");
+        setError(`Erro ao fazer login: ${err.message}`);
       }
     } finally {
       setLoading(false);

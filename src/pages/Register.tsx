@@ -131,7 +131,7 @@ export default function Register() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
             <div className="h-[60px] flex items-center shrink-0">
-              <img src="/logo-novo.png" alt="Makel" className="h-full w-auto object-contain drop-shadow-md" onError={(e) => {
+              <img src="/logo-novo.png" alt="Makel" className="h-[60px] w-auto max-w-[200px] object-contain drop-shadow-md" onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 if (e.currentTarget.nextElementSibling) {
                   (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
@@ -172,7 +172,7 @@ export default function Register() {
           </div>
         </div>
         
-        <div className="relative z-10 text-sm text-muted-foreground">
+        <div className="relative z-10 text-sm text-muted-foreground mt-8">
           Já tem uma conta? <Link to="/login" className="text-primary font-bold hover:underline">Fazer login</Link>
         </div>
       </div>

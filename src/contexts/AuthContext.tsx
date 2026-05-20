@@ -83,6 +83,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      
+      if (error) {
+        if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
+          console.error("ERRO CRÍTICO: A tabela 'profiles' não existe no Supabase.");
+          alert("Erro crítico: As tabelas do banco de dados não foram criadas no Supabase. Por favor, rode o script SQL fornecido no modo SQL Editor do seu projeto Supabase.");
+        }
+      }
+
       if (data) {
         // map db to appUser
         const p: AppUser = {
@@ -122,7 +130,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     if (data.user) {
       // Check status from profile
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+      const { data: profile, error: profileError } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+      
+      if (profileError && (profileError.code === 'PGRST205' || profileError.message?.includes('schema cache'))) {
+         await supabase.auth.signOut();
+         throw new Error("As tabelas do banco de dados (SQL) não foram criadas no seu projeto Supabase. Execute o arquivo supabase-schema.sql no painel.");
+      }
+
       if (profile) {
         if (profile.status === 'inativo' || profile.status === 'bloqueado' || profile.status === 'recusado') {
           await supabase.auth.signOut();

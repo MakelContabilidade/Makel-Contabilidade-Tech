@@ -1,5 +1,15 @@
 const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient('https://nkvwyumzxobvxashtooo.supabase.com', 'sb_publishable_1B_0eojVv-yIUFTqMoPswg_2z0dglXi');
-supabase.auth.signUp({ email: 'test@example.com', password: 'password123' })
-  .then(res => console.log('Response:', JSON.stringify(res, null, 2)))
-  .catch(err => console.error('Error:', err));
+const supabaseUrl = 'https://nkvwyumzxobvxashtooo.supabase.co';
+const supabaseKey = 'sb_publishable_1B_0eojVv-yIUFTqMoPswg_2z0dglXi';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function check() {
+    const { data: user, error: loginE } = await supabase.auth.signInWithPassword({
+        email: 'kleber.adm@makelcontabilidade.com',
+        password: 'MasterPassword123!'
+    });
+    if (loginE) console.error(loginE);
+    const { data, error } = await supabase.from('profiles').select('*').limit(1);
+    console.log(data, error);
+}
+check();

@@ -174,7 +174,7 @@ export default function Suporte() {
         { icon: MessageCircle, label: "Abrir Chamado", desc: "Dúvidas ou solicitações", action: () => setActiveModal("chamado") },
         { icon: Tag, label: "Minhas Solicitações", desc: "Acompanhar chamados", action: () => setCurrentView('tickets') },
         { icon: Library, label: "Ajuda e Manual", desc: "Base de conhecimento", action: () => navigate("/manual") },
-        { icon: MessageSquare, label: "Falar com a Makel", desc: "Atendimento via WhatsApp", iconColor: "text-success", action: () => window.open('https://wa.me/5511999999999?text=Preciso%20de%20suporte', '_blank') },
+        { icon: MessageSquare, label: "Falar com a Makel", desc: "Atendimento via WhatsApp", iconColor: "text-success", action: () => { window.open('https://wa.me/5511999999999?text=Preciso%20de%20suporte', '_blank') } },
       ]
     },
     {
