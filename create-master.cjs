@@ -17,9 +17,9 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 async function createMaster() {
-  const email = 'kleber.adm@makelcontabilidade.com';
-  const password = 'Kleber@05';
-  const name = 'Kleber Felipe';
+  const email = 'makelcontabil@gmail.com';
+  const password = 'Makel@05;';
+  const name = 'Makel Contábil';
 
   console.log(`Tentando criar/autenticar usuário MASTER: ${email}`);
 
