@@ -1,6 +1,6 @@
 {
-  "name": "Remix: Makel Contabilidade Tech",
+  "name": "Makel Contabilidade Tech",
   "description": "Makel Contabilidade Tech",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

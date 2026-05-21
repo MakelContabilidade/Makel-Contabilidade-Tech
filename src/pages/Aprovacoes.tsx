@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { XCircle, CheckCircle, ShieldAlert, Badge, UserCheck, UserX, Clock, Database, Globe } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import bcrypt from "bcryptjs";
+import { supabase } from "@/lib/supabase";
 
 export default function Aprovacoes() {
   const { appUser } = useAuth();
@@ -13,56 +14,47 @@ export default function Aprovacoes() {
     loadUsers();
   }, []);
 
-  const loadUsers = () => {
-    const usersStr = localStorage.getItem("@Makel:users") || "{}";
-    const usersObj = JSON.parse(usersStr);
-    const usersList = Object.values(usersObj).filter((u: any) => u.uid !== appUser?.uid && u.role === "CLIENTE");
-    setUsers(usersList as any[]);
+  const loadUsers = async () => {
+    const { data, error } = await supabase.from('profiles').select('*').eq('role', 'CLIENTE').neq('id', appUser?.uid);
+    if (data) {
+      const usersList = data.map((u: any) => ({
+        ...u,
+        uid: u.id,
+        companyName: u.company_name
+      }));
+      setUsers(usersList);
+    }
   };
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [credentials, setCredentials] = useState<{email: string, pass: string} | null>(null);
 
-  const updateUserStatus = (uid: string, status: string, role?: string) => {
-    const usersStr = localStorage.getItem("@Makel:users") || "{}";
-    const usersObj = JSON.parse(usersStr);
-    if (usersObj[uid]) {
-      let rawPassword = "";
-      if (status === "aprovado" && usersObj[uid].status !== "aprovado") {
-        // Generating pass
-        rawPassword = "Makel" + Math.floor(1000 + Math.random() * 9000) + "!";
-        const password_hash = bcrypt.hashSync(rawPassword, 10);
-        usersObj[uid].password_hash = password_hash;
-        usersObj[uid].must_change_password = true;
-      }
+  const updateUserStatus = async (uid: string, status: string, role?: string) => {
+    const dbUpdate: any = { status };
+    if (role) dbUpdate.role = role;
+    
+    // update in supabase
+    const { error } = await supabase.from('profiles').update(dbUpdate).eq('id', uid);
+    
+    if (error) {
+      alert("Erro ao atualizar: " + error.message);
+      return;
+    }
+    
+    loadUsers();
+    
+    // Log Audit
+    await supabase.from('audits').insert([{
+      user_id: appUser?.uid,
+      action: `Alterou status para ${status} do cliente ${uid}`,
+      details: `Novo status: ${status}`,
+      date: new Date().toISOString()
+    }]);
 
-      usersObj[uid].status = status;
-      if (role) {
-        usersObj[uid].role = role;
-      }
-      localStorage.setItem("@Makel:users", JSON.stringify(usersObj));
-      loadUsers();
-      
-      // Log Audit
-      const audit = {
-        id: "audit_" + Date.now(),
-        userId: appUser?.uid,
-        userName: appUser?.name,
-        action: `Alterou status para ${status} do cliente ${usersObj[uid].name}`,
-        module: "Clientes",
-        date: Date.now(),
-        ip: "127.0.0.1"
-      };
-      const audits = JSON.parse(localStorage.getItem("@Makel:audits") || "[]");
-      audits.push(audit);
-      localStorage.setItem("@Makel:audits", JSON.stringify(audits));
-      
-      if (rawPassword) {
-        setCredentials({ email: usersObj[uid].email, pass: rawPassword });
-        setActiveModal("credentials");
-      } else {
-        alert(`Cliente atualizado com sucesso para: ${status}`);
-      }
+    if (status === "aprovado") {
+      alert(`Cliente provado com sucesso! Mande ele recuperar a senha na tela de login.`);
+    } else {
+      alert(`Cliente atualizado com sucesso para: ${status}`);
     }
   };
 
