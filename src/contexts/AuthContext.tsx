@@ -52,30 +52,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    let mounted = true;
     const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser({ uid: session.user.id, email: session.user.email });
-        await fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Auth session error:", error);
+          if (mounted) setLoading(false);
+          return;
+        }
+        if (session?.user) {
+          if (mounted) setUser({ uid: session.user.id, email: session.user.email });
+          await fetchProfile(session.user.id);
+        } else {
+          if (mounted) setLoading(false);
+        }
+      } catch (err) {
+        console.error("Error during initAuth:", err);
+        if (mounted) setLoading(false);
       }
     };
     
     initAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        setUser({ uid: session.user.id, email: session.user.email });
-        await fetchProfile(session.user.id);
-      } else {
-        setUser(null);
-        setAppUser(null);
-        setLoading(false);
+      try {
+        if (session?.user) {
+          if (mounted) setUser({ uid: session.user.id, email: session.user.email });
+          await fetchProfile(session.user.id);
+        } else {
+          if (mounted) setUser(null);
+          if (mounted) setAppUser(null);
+          if (mounted) setLoading(false);
+        }
+      } catch (err) {
+        console.error("Auth state change error:", err);
+        if (mounted) setLoading(false);
       }
     });
 
     return () => {
+      mounted = false;
       authListener.subscription.unsubscribe();
     };
   }, []);
@@ -87,12 +104,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
           console.error("ERRO CRÍTICO: A tabela 'profiles' não existe no Supabase.");
-          alert("Erro crítico: As tabelas do banco de dados não foram criadas no Supabase. Por favor, rode o script SQL fornecido no modo SQL Editor do seu projeto Supabase.");
+          // remove alert, use console.error to not block anything
         }
       }
 
       if (data) {
-        // map db to appUser
         const p: AppUser = {
           uid: data.id,
           email: data.email,

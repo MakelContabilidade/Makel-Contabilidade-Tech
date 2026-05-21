@@ -109,7 +109,7 @@ export default function Login() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-semibold text-muted-foreground">Senha</label>
-                  <a href="#" className="text-xs text-primary font-medium hover:underline">Esqueci minha senha</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); alert("Função de recuperação de senha em desenvolvimento."); }} className="text-xs text-primary font-medium hover:underline">Esqueci minha senha</a>
                 </div>
                 <input
                   type="password"

@@ -386,7 +386,7 @@ export default function Register() {
                       className="mt-1 w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary focus:ring-offset-background" 
                     />
                     <label htmlFor="terms" className="text-sm text-muted-foreground leading-snug">
-                      Eu li e aceito os <a href="#" className="text-primary hover:underline">Termos de Uso</a> e <a href="#" className="text-primary hover:underline">Política de Privacidade</a>.
+                      Eu li e aceito os <a href="#" onClick={(e) => e.preventDefault()} className="text-primary hover:underline">Termos de Uso</a> e <a href="#" onClick={(e) => e.preventDefault()} className="text-primary hover:underline">Política de Privacidade</a>.
                     </label>
                   </div>
                   <div className="flex items-start gap-3">
